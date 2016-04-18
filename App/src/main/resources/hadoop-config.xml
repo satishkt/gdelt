@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:lang="http://www.springframework.org/schema/lang"
+       xmlns:hdp="http://www.springframework.org/schema/hadoop"
+       xsi:schemaLocation="http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/hadoop http://www.springframework.org/schema/hadoop/spring-hadoop.xsd  http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context.xsd ">
+
+    <context:property-placeholder location="classpath*:application.properties"/>
+
+
+    <hdp:configuration file-system-uri="${fs.defaultFS}" rm-manager-uri="${hd.rm}">
+        mapreduce.framework=yarn
+    </hdp:configuration>
+
+
+    <hdp:file-system/>
+
+    <hdp:resource-loader id="loader" configuration-ref="hadoopConfiguration"/>
+
+
+    <hdp:job id="eventIdCounter" input-path="${input.path}" output-path="${output.path}"
+             mapper="com.dummy.variable.GlobablEventIDMapper" reducer="com.dummy.variable.GlobalEventIDReducer"
+             number-reducers="3"/>
+
+    <hdp:script id="setupScript" location="copy-input-files.groovy">
+        <hdp:property name="localSourceDir" value="${localSourceDir}"/>
+        <hdp:property name="inputDir" value="${input.path}"/>
+        <hdp:property name="outputDir" value="${output.path}"/>
+    </hdp:script>
+
+
+    <hdp:script id="outScript" location="copy-output.groovy">
+        <hdp:property name="localOutputDir" value="${localOutputDir}"/>
+        <hdp:property name="outputDir" value="${output.path}"/>
+    </hdp:script>
+
+
+    <hdp:job-runner id="runner" run-at-startup="true" pre-action="setupScript" post-action="outScript"
+                    job-ref="eventIdCounter"/>
+
+
+
+    <hdp:tool-runner
+
+
+</beans>
+
+
+
